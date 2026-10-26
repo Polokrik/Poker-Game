@@ -1,7 +1,7 @@
 const assert = require('assert');
 const load = require('./load');
-process.env.EXPORTS = 'RANKS,HAND_NAMES,best,cmp,equity,equityVs,parseCard,chen,handLabel,newGame,startHand,act,legal,botDecide,pot,sidePots,analyze,fullDeck,cardKey,live';
-const E = load(['engine.js', 'game.js', 'bots.js']);
+process.env.EXPORTS = 'RANKS,HAND_NAMES,best,cmp,equity,equityVs,parseCard,chen,handLabel,newGame,startHand,act,legal,botDecide,pot,sidePots,analyze,fullDeck,cardKey,live,rangeAction,rangePct,rangeGrid,labelScore,preflopAdvice,QUESTIONS,SITUATIONS,CHAPTERS';
+const E = load(['engine.js', 'game.js', 'bots.js', 'ranges.js', 'content.js', 'situations.js']);
 const h = s => s.split(' ').map(E.parseCard);
 let n = 0; const t = (name, fn) => { fn(); n++; console.log('ok', name); };
 
@@ -58,5 +58,48 @@ t('simulation bots-vs-bots : conservation des jetons, pas de blocage', () => {
       assert(g.players.every(p => p.stack >= 0));
     }
   }
+});
+t('ranges : largeur croissante avec la position', () => {
+  const w = ['UTG', 'MP', 'CO', 'BTN'].map(p => E.rangePct('open', p));
+  assert(w[0] < w[1] && w[1] < w[2] && w[2] < w[3], w.join());
+  assert.equal(E.rangeAction('open', 'UTG', 'AA'), 'raise');
+  assert.equal(E.rangeAction('open', 'UTG', '72o'), 'fold');
+  assert.equal(E.rangeAction('vs3bet', 'BTN', '72o'), 'fold');
+});
+t('ranges : monotonie (une main plus forte n\'est jamais jouée plus passivement)', () => {
+  const rank = { fold: 0, call: 1, raise: 2 };
+  const labels = E.rangeGrid('open', 'BTN').flat().map(c => c.label).filter(l => l[0] !== l[1]);
+  for (const spot of ['open', 'vsOpen', 'vs3bet'])
+    for (const pos of ['UTG', 'MP', 'CO', 'BTN', 'SB']) {
+      const acts = labels.map(l => [E.labelScore(l), rank[E.rangeAction(spot, pos, l)]]).sort((x, y) => x[0] - y[0]);
+      for (let i = 1; i < acts.length; i++) if (acts[i][0] > acts[i - 1][0]) assert(acts[i][1] >= acts[i - 1][1], `${spot} ${pos}`);
+    }
+});
+t('conseil preflop : la BB peut checker gratuitement', () => {
+  assert.equal(E.preflopAdvice('BB', [E.parseCard('7s'), E.parseCard('2h')], 0).action, 'check');
+});
+t('quiz : questions bien formées', () => {
+  for (const q of E.QUESTIONS) {
+    assert(q.q && q.e && q.c >= 1 && q.c <= 6, q.q);
+    if (q.type === 'mc') assert(q.o.length === 4 && q.a >= 0 && q.a < 4, q.q);
+    if (q.type === 'tf') assert.equal(typeof q.a, 'boolean', q.q);
+    if (q.type === 'ordering') assert(q.items.length >= 3, q.q);
+  }
+});
+t('situations : cartes valides et sans doublon', () => {
+  for (const s of E.SITUATIONS) {
+    const cards = [s.hero, s.vil, s.board].join(' ').trim().split(/\s+/);
+    assert.equal(new Set(cards).size, cards.length, s.t);
+    cards.forEach(c => assert(/^[2-9TJQKA][shdc]$/.test(c), s.t + ' ' + c));
+  }
+});
+t('situations : équité des cas clés cohérente avec la théorie', () => {
+  const eq = i => { const s = E.SITUATIONS[i]; return E.equityVs(s.hero.split(' ').map(E.parseCard), s.vil.split(' ').map(E.parseCard), s.board ? s.board.split(' ').map(E.parseCard) : [], 8000); };
+  const by = name => E.SITUATIONS.findIndex(s => s.t.startsWith(name));
+  assert(eq(by('La course')).equity > 0.5 && eq(by('La course')).equity < 0.6);
+  assert(eq(by('Drawing dead')).equity < 0.001);
+  assert(Math.abs(eq(by('Quand le board joue')).equity - 0.5) < 0.001);
+  assert(eq(by('Le jackpot')).equity > 0.99);
+  assert(eq(by('Royale')).equity > 0.99);
 });
 console.log(`${n} tests passés`);

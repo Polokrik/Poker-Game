@@ -29,7 +29,7 @@ function startHand(g) {
   g.hand++;
   g.players.forEach(p => {
     if (p.stack <= 0) { p.stack = g.startStack; p.rebuys = (p.rebuys || 0) + 1; }
-    p.cards = []; p.bet = 0; p.total = 0; p.folded = false; p.allin = false; p.acted = false; p.shown = false;
+    p.cards = []; p.bet = 0; p.total = 0; p.folded = false; p.allin = false; p.acted = false; p.shown = false; p.last = '';
   });
   g.button = (g.button + 1) % 6;
   g.deck = shuffle(fullDeck());
@@ -61,16 +61,18 @@ function act(g, p, type, amount) {
   if (type === 'check' && !L.canCheck) type = 'call';
   if (type === 'raise' && !L.canRaise) type = L.canCheck ? 'check' : 'call';
   if (type === 'call' && L.toCall === 0) type = 'check';
-  if (type === 'fold') { p.folded = true; say(g, `${p.name} se couche.`); }
-  else if (type === 'check') say(g, `${p.name} checke.`);
+  if (type === 'fold') { p.folded = true; p.last = 'Couché'; say(g, `${p.name} se couche.`); }
+  else if (type === 'check') { p.last = 'Check'; say(g, `${p.name} checke.`); }
   else if (type === 'call') {
     const paid = post(g, p, L.toCall);
+    p.last = p.allin ? 'Tapis' : `Suit ${paid}`;
     say(g, `${p.name} suit ${paid}${p.allin ? ' (tapis)' : ''}.`);
   } else if (type === 'raise') {
     let to = Math.max(L.minTo, Math.min(Math.round(amount), L.maxTo));
     const size = to - g.currentBet;
     const verb = g.currentBet === 0 ? 'mise' : 'relance à';
     post(g, p, to - p.bet);
+    p.last = p.allin ? 'Tapis' : `${g.currentBet === 0 ? 'Mise' : 'Relance'} ${to}`;
     const full = size >= g.minRaise;
     if (full) g.minRaise = size;
     g.currentBet = Math.max(g.currentBet, p.bet);
@@ -93,7 +95,7 @@ function advance(g, last) {
   if (live(g).length === 1) return finishUncontested(g);
   if (nextActor(g, last.id)) return 'continue';
   // tour d'enchères terminé
-  g.players.forEach(p => { p.bet = 0; p.acted = false; });
+  g.players.forEach(p => { p.bet = 0; p.acted = false; if (!p.folded && !p.allin) p.last = ''; });
   g.currentBet = 0; g.minRaise = g.bb;
   while (true) {
     if (g.street === 'river') return showdown(g);

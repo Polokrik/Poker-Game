@@ -3,23 +3,36 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0e2a22">
 <title>Hold'em Académie</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <header class="top">
-  <a class="brand" href="#/learn/1"><span class="suit">♠</span> Hold'em Académie</a>
+  <a class="brand" href="#/home"><span class="suit">♠</span> Hold'em Académie</a>
   <nav id="nav">
     <a href="#/learn/1" data-r="learn">Cours</a>
     <a href="#/quiz" data-r="quiz">Quiz</a>
-    <a href="#/legends" data-r="legends">Légendes</a>
+    <a href="#/ranges" data-r="ranges">Ranges</a>
+    <a href="#/pre" data-r="pre">Preflop</a>
+    <a href="#/drill" data-r="drill">Calculs</a>
+    <a href="#/sit" data-r="sit">Situations</a>
+    <a href="#/play" data-r="play">Jouer</a>
     <a href="#/sim" data-r="sim">Simulateur</a>
+    <a href="#/probas" data-r="probas">Probas</a>
+    <a href="#/legends" data-r="legends">Légendes</a>
   </nav>
 </header>
 <main id="app"></main>
 <script src="content.js"></script>
 <script src="engine.js"></script>
+<script src="game.js"></script>
+<script src="bots.js"></script>
+<script src="ranges.js"></script>
+<script src="play.js"></script>
+<script src="train.js"></script>
+<script src="situations.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

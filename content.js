@@ -34,7 +34,7 @@ const CHAPTERS = [
 ]},
 { id: 4, title: 'Mathématiques', lessons: [
   { t: 'Cotes du pot', h: `<p>Équité nécessaire = Call ÷ (Pot + Call).</p>
-   <div class="key"><b>Exemple :</b> pot 150, adversaire mise 50. Vous payez 50 pour gagner 200 : 50/200 = <b>25 %</b>. Si votre équité dépasse 25 %, le call est rentable.</div>` },
+   <div class="key"><b>Exemple :</b> le pot est de 100, l'adversaire mise 50. Vous payez 50 pour un pot final de 200 : 50/200 = <b>25 %</b>. Si votre équité dépasse 25 %, le call est rentable.</div>` },
   { t: 'Règle du 2 et du 4', h: `<p>Au flop : outs × 4. Au turn : outs × 2.</p>
    <ul><li>Tirage couleur : 9 outs, ~36 % au flop, ~18 % au turn</li><li>Tirage quinte ouvert : 8 outs, ~32 % / ~16 %</li><li>Tirage quinte ventral : 4 outs, ~16 % / ~8 %</li><li>Deux overcards : 6 outs, ~24 % / ~12 %</li></ul>` },
   { t: 'Espérance de gain (EV)', h: `<p>EV = (% gain × gain) − (% perte × perte). Visez des décisions +EV. Le résultat d'une seule main ne prouve rien, seul le long terme compte.</p>` },
@@ -116,4 +116,14 @@ const LEGENDS = [
 { n:'Phil Ivey', y:'2000s-2020s', who:'Multiple bracelets WSOP, cash games',
   s:'Considéré par beaucoup comme l\'un des plus complets : lectures de joueurs, flexibilité, sens du jeu.',
   l:'L\'adaptation : un joueur complet change de plan selon l\'adversaire plutôt que de suivre un seul style.' }
+];
+
+// Les idées qui ont changé la façon de jouer, associées à ce qu'on peut en appliquer à la table.
+const EXPERTS = [
+{ n: 'Doyle Brunson', d: 'Super/System (1978)', i: 'Un des premiers livres de stratégie écrits par des joueurs de haut niveau. Il a popularisé l\'idée que l\'agressivité raisonnée paie plus que la prudence passive.', a: 'Entre dans un pot en relançant, pas en suivant : on gagne en faisant coucher, pas seulement en ayant la meilleure main.' },
+{ n: 'David Sklansky', d: 'The Theory of Poker (1987)', i: 'Formalise le théorème fondamental : chaque décision se mesure à ce qu\'on ferait en voyant les cartes de l\'adversaire.', a: 'Avant chaque décision, demandez-vous : « contre quelles mains ma main est-elle devant ? » plutôt que « est-elle bonne ? ».' },
+{ n: 'Dan Harrington', d: 'Harrington on Hold\'em (2004), vainqueur du Main Event 1995', i: 'Introduit le ratio M en tournoi : tapis divisé par le coût d\'un tour de blinds et d\'antes. Il mesure combien de temps vous pouvez attendre.', a: 'M inférieur à 10 : jouez plus vite et plus large. M inférieur à 5 : tapis ou fold.' },
+{ n: 'Daniel Negreanu', d: 'Style « small ball », deux fois Joueur de l\'Année WSOP (2013 et 2014)', i: 'Petites mises, pots maîtrisés, lecture fine des adversaires : on évite de risquer tout son tapis sans avoir les meilleures cartes.', a: 'Avec une main moyenne, contrôlez la taille du pot au lieu de gonfler. Gardez les gros pots pour les grosses mains.' },
+{ n: 'Annie Duke', d: 'Thinking in Bets (2018)', i: 'Importe au grand public l\'idée de « resulting » : juger une décision à son résultat plutôt qu\'à sa qualité.', a: 'Après une main perdue, relisez les informations disponibles à ce moment-là, pas la carte qui est tombée.' },
+{ n: 'L\'ère des solveurs', d: 'Depuis le milieu des années 2010', i: 'Les logiciels de résolution (GTO) ont montré des lignes contre-intuitives : mises plus petites, plus de check, plus de bluffs bien choisis. Les stratégies de référence viennent désormais autant du calcul que de l\'intuition.', a: 'Apprenez les grandes tendances (fréquences, tailles) plutôt que des ranges par cœur : c\'est ce qui se transfère entre situations.' }
 ];

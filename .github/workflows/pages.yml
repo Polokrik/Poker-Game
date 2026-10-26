@@ -1,5 +1,6 @@
 name: Deploy to GitHub Pages
 on:
+  pull_request:
   push:
     branches: [main]
   workflow_dispatch:
@@ -11,7 +12,17 @@ concurrency:
   group: pages
   cancel-in-progress: true
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node tests/run.js
   deploy:
+    needs: test
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     environment:
       name: github-pages

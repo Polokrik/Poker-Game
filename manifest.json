@@ -1,0 +1,11 @@
+{
+  "name": "Hold'em Académie",
+  "short_name": "Hold'em",
+  "description": "Apprendre le Texas Hold'em : cours, quiz, ranges, situations et table contre des bots.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0e2a22",
+  "theme_color": "#0e2a22",
+  "lang": "fr",
+  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}

@@ -110,7 +110,9 @@ function quizResult() {
 /* ---------- LÉGENDES ---------- */
 function viewLegends() {
   $app.innerHTML = `<h1>Légendes du poker</h1><p>Des coups et des parcours qui ont marqué l'histoire, avec ce qu'on peut en retenir.</p>
-    ${LEGENDS.map(l => `<div class="legend"><h3>${l.n}</h3><p class="meta">${l.y} · ${l.who}</p><p>${l.s}</p><div class="key"><b>Leçon :</b> ${l.l}</div></div>`).join('')}`;
+    ${LEGENDS.map(l => `<div class="legend"><h3>${l.n}</h3><p class="meta">${l.y} · ${l.who}</p><p>${l.s}</p><div class="key"><b>Leçon :</b> ${l.l}</div></div>`).join('')}
+    <h1 style="margin-top:2.5rem">Les idées des experts</h1><p>Moins de coups d'éclat, plus de principes réutilisables.</p>
+    ${EXPERTS.map(x => `<div class="legend"><h3>${x.n}</h3><p class="meta">${x.d}</p><p>${x.i}</p><div class="key"><b>À appliquer :</b> ${x.a}</div></div>`).join('')}`;
 }
 
 /* ---------- SIMULATEUR ---------- */
@@ -161,15 +163,47 @@ function resultHTML() {
 }
 
 /* ---------- ROUTEUR ---------- */
+function viewHome() {
+  const read = Object.keys(store.get('read', {})).length, scores = store.get('scores', {}), vis = store.get('visited', {}), pl = store.get('play', { hands: 0 });
+  const steps = [
+    ['#/learn/1', 'Lire les chapitres 1 et 2', 'Mains, positions, ranges de départ.', read >= 2],
+    ['#/quiz/1', 'Faire un quiz', 'Vérifiez ce qui est acquis.', Object.keys(scores).length > 0],
+    ['#/ranges', 'Étudier la grille de ranges', 'Quelles mains jouer depuis chaque position.', vis.ranges],
+    ['#/pre', 'S\'entraîner au preflop', 'Décisions rapides, correction immédiate.', vis.pre],
+    ['#/drill', 'Maîtriser les calculs', 'Cotes, outs, combinaisons, MDF, EV.', vis.drill],
+    ['#/sit', 'Explorer les situations', 'Du coin flip courant au jackpot légendaire.', vis.sit],
+    ['#/play', 'Jouer une première session', 'Niveau débutant, avec le coach activé.', pl.hands >= 10],
+    ['#/play', 'Monter en niveau', 'Intermédiaire puis avancé, sans coach.', pl.hands >= 50]
+  ];
+  const doneN = steps.filter(s => s[3]).length;
+  $app.innerHTML = `<h1>Apprendre le Texas Hold'em en décidant</h1>
+    <p>Un cours, des exercices, un simulateur et une vraie table contre des bots. L'idée : lire peu, décider beaucoup, et recevoir un retour chiffré à chaque décision.</p>
+    <div class="bar" style="margin:1rem 0"><div style="width:${doneN / steps.length * 100}%"></div></div>
+    <p class="meta">${doneN} étape(s) sur ${steps.length}</p>
+    ${steps.map((s, i) => `<a class="step ${s[3] ? 'done' : ''}" href="${s[0]}"><span class="n">${s[3] ? '✓' : i + 1}</span><span><b>${s[1]}</b><br><small>${s[2]}</small></span></a>`).join('')}
+    <div class="key"><b>Le principe :</b> 20 % de théorie, 60 % de pratique, 20 % de revue. Si vous lisez plus que vous ne jouez, passez à la table.</div>`;
+}
+
 function route() {
-  const [, r, p] = (location.hash || '#/learn/1').split('/');
+  const [, r, p] = (location.hash || '#/home').split('/');
+  if (r) { const v = store.get('visited', {}); if (!v[r]) { v[r] = true; store.set('visited', v); } }
   document.querySelectorAll('#nav a').forEach(a => a.classList.toggle('on', a.dataset.r === r));
   if (r !== 'quiz') quiz = null;
   window.scrollTo(0, 0);
+  clearTimeout(play.timer); probs.running = false;
   if (r === 'quiz') viewQuiz(p);
   else if (r === 'legends') viewLegends();
   else if (r === 'sim') viewSim();
-  else viewLearn(p);
+  else if (r === 'learn') viewLearn(p);
+  else if (r === 'ranges') viewRanges();
+  else if (r === 'pre') viewPre();
+  else if (r === 'drill') viewDrill();
+  else if (r === 'sit') viewSituations();
+  else if (r === 'probas') viewProbas();
+  else if (r === 'play') viewPlay();
+  else viewHome();
 }
 addEventListener('hashchange', route);
 route();
+
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(() => {});
