@@ -16,7 +16,6 @@ const rich = html => html
     `<span class="cards">${inner.replace(/\[([2-9TJQKA][shdc])\]/g, (_, t) => cardHTML(t, sm ? 'sm' : ''))}</span>`)
   .replace(/\[([2-9TJQKA][shdc])\]/g, (_, t) => cardHTML(t, 'sm'));
 
-const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 
 /* ---------- COURS ---------- */
 function viewLearn(id) {

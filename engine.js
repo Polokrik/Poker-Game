@@ -84,3 +84,40 @@ function equity(hero, board, opps, iters = 6000) {
   }
   return { win: win / iters, tie: tie / iters, equity: (win + tie / 2) / iters };
 }
+
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+
+// Équité de `hero` contre une main adverse connue
+function equityVs(hero, villain, board, iters = 4000) {
+  const used = new Set([...hero, ...villain, ...board].map(cardKey));
+  const pool = fullDeck().filter(c => !used.has(cardKey(c)));
+  const need = 5 - board.length;
+  let win = 0, tie = 0;
+  for (let i = 0; i < iters; i++) {
+    for (let k = 0; k < need; k++) { const j = k + Math.floor(Math.random() * (pool.length - k)); [pool[k], pool[j]] = [pool[j], pool[k]]; }
+    const full = board.concat(pool.slice(0, need));
+    const c = cmp(best(hero.concat(full)), best(villain.concat(full)));
+    if (c > 0) win++; else if (c === 0) tie++;
+  }
+  return { win: win / iters, tie: tie / iters, lose: 1 - (win + tie) / iters, equity: (win + tie / 2) / iters };
+}
+
+// Libellé de main de départ : "AKs", "QQ", "T9o"
+function handLabel(a, b) {
+  const hi = a.r >= b.r ? a : b, lo = hi === a ? b : a;
+  if (hi.r === lo.r) return RANKS[hi.r] + RANKS[lo.r];
+  return RANKS[hi.r] + RANKS[lo.r] + (hi.s === lo.s ? 's' : 'o');
+}
+
+// Score de Chen : approximation classique de la force d'une main de départ
+function chen(a, b) {
+  const pts = r => r === 12 ? 10 : r === 11 ? 8 : r === 10 ? 7 : r === 9 ? 6 : (r + 2) / 2;
+  const hi = a.r >= b.r ? a : b, lo = hi === a ? b : a;
+  let s = pts(hi.r);
+  if (hi.r === lo.r) return Math.max(5, Math.ceil(s * 2));
+  if (hi.s === lo.s) s += 2;
+  const gap = hi.r - lo.r - 1;
+  s -= gap === 0 ? 0 : gap === 1 ? 1 : gap === 2 ? 2 : gap === 3 ? 4 : 5;
+  if (gap <= 1 && hi.r < 10) s += 1;
+  return Math.ceil(s);
+}
